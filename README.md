@@ -12,7 +12,7 @@ A Java library containing an algorithm and some utility functions to transform n
 	</repositories>
 	<dependency>
 	    <groupId>com.github.andrewlalis</groupId>
-	    <artifactId>TengwarTranslator</artifactId>
+	    <artifactId>TengwarTranslatorLibrary</artifactId>
 	    <version>@VERSION@</version>
 	</dependency>
 </project>
