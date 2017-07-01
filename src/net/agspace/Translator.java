@@ -1,7 +1,10 @@
+package net.agspace;
+
 import java.util.*;
 
 /**
-* Created by Andrew's Computer on 23-Apr-17.
+* @author Andrew Lalis
+ * Main class that holds static translation methods.
 */
 public class Translator {
 
