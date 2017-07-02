@@ -23,24 +23,33 @@ public class TengwarImageGenerator {
      * @return An Image Object containing the drawn text.
      */
     public static File generateImage(String tengwarText, int maxWidth, float fontSize, boolean bold, boolean italic, String filepath) {
+
         BufferedImage bufferedImage = new BufferedImage(1, 1, BufferedImage.TYPE_INT_RGB);
         Graphics2D graphics = bufferedImage.createGraphics();
         Font tengwarFont = getTengwarFont(bold, italic, fontSize);
         graphics.setFont(tengwarFont);
         FontMetrics fm = graphics.getFontMetrics();
         int width = fm.stringWidth(tengwarText);
+        if (width > maxWidth){
+            width = maxWidth;
+        }
         int height = fm.getHeight();
         graphics.dispose();
 
-        bufferedImage = new BufferedImage(width, height, BufferedImage.TYPE_INT_RGB);
+        String wrappedText = wrapTextByPixels(tengwarText, maxWidth-10, fm);
+        String[] lines = wrappedText.split("\n");
+
+        bufferedImage = new BufferedImage(width, (height*lines.length)+fm.getMaxDescent(), BufferedImage.TYPE_INT_RGB);
         graphics = bufferedImage.createGraphics();
         graphics.setBackground(new Color(54, 57, 62));
-        graphics.clearRect(0, 0, width, height);
+        graphics.clearRect(0, 0, width, height*lines.length+fm.getMaxDescent());
         graphics.setRenderingHint(RenderingHints.KEY_TEXT_ANTIALIASING, RenderingHints.VALUE_TEXT_ANTIALIAS_ON);
 
         graphics.setColor(Color.white);
         graphics.setFont(tengwarFont);
-        graphics.drawString(tengwarText, 0, fm.getAscent());
+        for (int i = 0; i < lines.length; i++){
+            graphics.drawString(lines[i], 5, height*(i+1));
+        }
         graphics.dispose();
 
         try {
@@ -78,6 +87,46 @@ public class TengwarImageGenerator {
             e.printStackTrace();
         }
         return font;
+    }
+
+    /**
+     * Inserts newline characters into a string of text so that it will not overflow beyond a line size.
+     * @param text The text to wrap.
+     * @param width The width, in pixels, of the block of text.
+     * @param fm The font metrics object to use.
+     * @return A new string with newline characters inserted.
+     */
+    public static String wrapTextByPixels(String text, int width, FontMetrics fm){
+        String[] words = text.split(" ");
+        StringBuilder sb = new StringBuilder();
+        int currentWidth = 0;
+        for (String word : words) {
+            int wordWidth = fm.stringWidth(word + ' ');
+            //Deal with words greater than the max length.
+            if (wordWidth > width) {
+                char[] chars = word.toCharArray();
+                for (char c : chars) {
+                    int charWidth = fm.charWidth(c);
+                    if (currentWidth + charWidth < width) {
+                        currentWidth += charWidth;
+                        sb.append(c);
+                    } else {
+                        currentWidth = charWidth;
+                        sb.append("-\n").append(c);
+                    }
+                }
+                sb.append(' ');
+            } else if (currentWidth + wordWidth < width) {
+                //If the word fits normally.
+                currentWidth += wordWidth;
+                sb.append(word).append(' ');
+            } else {
+                //If the word causes a new line.
+                currentWidth = wordWidth;
+                sb.append('\n').append(word).append(' ');
+            }
+        }
+        return sb.toString().trim();
     }
 
 }
