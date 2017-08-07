@@ -13,6 +13,18 @@ import java.io.IOException;
 public class TengwarImageGenerator {
 
     /**
+     * Overloaded method for a simpler image generator, using white-on-black text and neither bold nor italics.
+     * @param tengwarText The string of tengwar text to transform into an image.
+     * @param maxWidth The maximum width, in pixels, that the generated image can be.
+     * @param fontSize The size of the font to use.
+     * @param filePath The path of the file to save the generated image to.
+     * @return An Image Object containing the drawn text.
+     */
+    public static File generateImage(String tengwarText, int maxWidth, float fontSize, String filePath){
+        return generateImage(tengwarText, maxWidth, fontSize, false, false, filePath, Color.black, Color.white);
+    }
+
+    /**
      * Generates an image of some tengwar text. The text is wrapped so that each line may not take up more than
      * {@code maxWidth} pixels.
      * @param tengwarText The string of tengwar text to transform into an image.
@@ -20,16 +32,20 @@ public class TengwarImageGenerator {
      * @param fontSize The size of the font to use.
      * @param bold Whether or not the font should be bold.
      * @param italic Whether or not the font should be italic.
+     * @param filepath The path of the file to save the generated image to.
+     * @param backgroundColor The background color of the image.
+     * @param foregroundColor The foreground color of the image.
      * @return An Image Object containing the drawn text.
      */
-    public static File generateImage(String tengwarText, int maxWidth, float fontSize, boolean bold, boolean italic, String filepath) {
+    public static File generateImage(String tengwarText, int maxWidth, float fontSize, boolean bold, boolean italic, String filepath, Color backgroundColor, Color foregroundColor) {
 
         BufferedImage bufferedImage = new BufferedImage(1, 1, BufferedImage.TYPE_INT_RGB);
         Graphics2D graphics = bufferedImage.createGraphics();
         Font tengwarFont = getTengwarFont(bold, italic, fontSize);
         graphics.setFont(tengwarFont);
         FontMetrics fm = graphics.getFontMetrics();
-        int width = fm.stringWidth(tengwarText);
+        //Set width of the image, either max width or the string width itself plus some padding space.
+        int width = fm.stringWidth(tengwarText) + 10;
         if (width > maxWidth){
             width = maxWidth;
         }
@@ -41,11 +57,12 @@ public class TengwarImageGenerator {
 
         bufferedImage = new BufferedImage(width, (height*lines.length)+fm.getMaxDescent(), BufferedImage.TYPE_INT_RGB);
         graphics = bufferedImage.createGraphics();
-        graphics.setBackground(new Color(54, 57, 62));
+        //graphics.setBackground(new Color(54, 57, 62)); Color for discord background.
+        graphics.setBackground(backgroundColor);
         graphics.clearRect(0, 0, width, height*lines.length+fm.getMaxDescent());
         graphics.setRenderingHint(RenderingHints.KEY_TEXT_ANTIALIASING, RenderingHints.VALUE_TEXT_ANTIALIAS_ON);
 
-        graphics.setColor(Color.white);
+        graphics.setColor(foregroundColor);
         graphics.setFont(tengwarFont);
         for (int i = 0; i < lines.length; i++){
             graphics.drawString(lines[i], 5, height*(i+1));
